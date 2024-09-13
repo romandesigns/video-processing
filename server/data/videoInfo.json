@@ -6,6 +6,13 @@
       "compressedSize": 254999433,
       "reductionPercentage": "-6225472.09",
       "outputPath": "/usr/src/app/temp/compressed_20221012_120554.mp4"
+    },
+    {
+      "originalName": "20221012_120554.mp4",
+      "originalSize": 4096,
+      "compressedSize": 816903960,
+      "reductionPercentage": "-19943844.34",
+      "outputPath": "/usr/src/app/temp/1726269706811-20221012_120554.mp4"
     }
   ]
 }

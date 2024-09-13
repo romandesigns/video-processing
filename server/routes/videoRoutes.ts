@@ -29,13 +29,22 @@ router.get("/videos", (req, res) => {
 router.get("/download/:fileName", (req, res) => {
   const fileName = req.params.fileName;
   const filePath = path.join(process.cwd(), "temp", fileName);
+
   if (fs.existsSync(filePath)) {
-    res.download(filePath, (err) => {
-      if (err) {
-        res
-          .status(500)
-          .json({ error: "Error occurred while downloading the file." });
-      }
+    const stat = fs.statSync(filePath);
+
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.setHeader("Content-Length", stat.size);
+
+    const readStream = fs.createReadStream(filePath);
+    readStream.pipe(res);
+
+    readStream.on("error", (err) => {
+      console.error("Error while reading the file:", err);
+      res
+        .status(500)
+        .json({ error: "Error occurred while downloading the file." });
     });
   } else {
     res.status(404).json({ error: "File not found." });

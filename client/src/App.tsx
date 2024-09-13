@@ -6,9 +6,11 @@ function App() {
   const [convertedVideos, setConvertedVideos] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null); // State to store error messages
 
+  const serverHost = process.env.REACT_APP_SERVER_HOST;
+
   const fetchVideos = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/videos", {
+      const response = await fetch(`${serverHost}/api/videos`, {
         cache: "no-cache",
       });
 
@@ -47,13 +49,10 @@ function App() {
       formData.append("video", video);
 
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/video-compression",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
+        const response = await fetch(`${serverHost}/api/video-compression`, {
+          method: "POST",
+          body: formData,
+        });
 
         // Check if the response is OK
         if (!response.ok) {
@@ -65,7 +64,6 @@ function App() {
 
         // After successful upload, re-fetch the list of converted videos
         setError(null); // Clear any previous errors
-        fetchVideos(); // Re-fetch videos to update the list
       } catch (error) {
         console.error("Error uploading video:", error);
         setError("Failed to upload video.");
@@ -102,7 +100,7 @@ function App() {
               <p>Compressed Size: {video.compressedSize} bytes</p>
               <p>Reduction: {video.reductionPercentage}%</p>
               <a
-                href={`http://localhost:5000/api/download/${video.outputPath
+                href={`${serverHost}/api/download/${video.outputPath
                   .split("/")
                   .pop()}`}
                 download

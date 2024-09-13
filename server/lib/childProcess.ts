@@ -25,13 +25,30 @@ process.on("message", (payload) => {
 
   // Define the output path within the "temp" directory
   const outputDir = path.join(process.cwd(), "temp"); // Ensure output is in the "temp" directory
-  const outputFilePath = path.join(outputDir, `compressed_${name}`);
+  const outputFilePath = path.join(
+    outputDir,
+    `${new Date().getTime()}-${name}`
+  );
 
-  // Process video and save it
+  console.log("Starting video compression...");
+
+  // Simplified FFmpeg command
   ffmpeg(tempFilePath)
-    .fps(30)
-    .addOptions(["-crf 28"])
+    .fps(30) // Set frame rate to 30 fps
+    .videoCodec("libx264") // Use H.264 codec for high-quality compression
+    .addOptions([
+      "-crf 23", // Adjust CRF for faster encoding while maintaining good quality
+      "-preset medium", // Use a medium preset for a balance between speed and compression
+    ])
+    .on("start", (commandLine) => {
+      console.log("Spawned FFmpeg with command: " + commandLine);
+    })
+    .on("progress", (progress) => {
+      console.log(`Processing: ${progress.percent}% done`);
+    })
     .on("end", () => {
+      console.log("Video compression completed.");
+
       // Get original and compressed file sizes
       const originalSize = fs.statSync(originalFilePath).size;
       const compressedSize = fs.statSync(outputFilePath).size;
@@ -73,6 +90,7 @@ process.on("message", (payload) => {
       });
     })
     .on("error", (err) => {
+      console.error("Error during video compression:", err.message);
       endProcess({ statusCode: 500, text: err.message });
     })
     .save(outputFilePath);
