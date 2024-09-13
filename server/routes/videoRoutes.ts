@@ -6,7 +6,9 @@ router.get("/", (req, res) => {
 });
 
 router.post("/video-compression", (req, res) => {
-  res.send("Hello World!");
+  if (!req.files) return;
+  console.log(req.files.video);
+  res.send("Success");
 });
 
 export default router;
