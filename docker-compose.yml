@@ -1,7 +1,7 @@
 services:
   server:
     build:
-      context: ./server # Correct context for server
+      context: ./server # Relative path to server folder
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
@@ -12,9 +12,11 @@ services:
 
   client:
     build:
-      context: ./client # Correct context for client
+      context: ./client # Relative path to client folder
       dockerfile: Dockerfile
     ports:
       - "80:80"
     environment:
       - NODE_ENV=production
+    volumes:
+      - ./client:/usr/src/app
