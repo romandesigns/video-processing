@@ -4,9 +4,17 @@ import "./App.css";
 function App(): JSX.Element {
   const [video, setVideo] = useState<File | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Corrected this line
-    console.log(video);
+    const uploadEndpoint = "http://localhost:5000/api/video-compression";
+    // Handle file upload
+    const formData = new FormData();
+    formData.append("video", video as Blob);
+    const response = await fetch(uploadEndpoint, {
+      method: "POST",
+      body: formData,
+    });
+    console.log(response);
   };
 
   return (
