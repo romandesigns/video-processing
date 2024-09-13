@@ -1,0 +1,11 @@
+{
+  "compressedVideos": [
+    {
+      "originalName": "20221012_120554.mp4",
+      "originalSize": 4096,
+      "compressedSize": 254999433,
+      "reductionPercentage": "-6225472.09",
+      "outputPath": "/usr/src/app/temp/compressed_20221012_120554.mp4"
+    }
+  ]
+}

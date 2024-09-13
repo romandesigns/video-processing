@@ -1,20 +1,76 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
-function App(): JSX.Element {
+function App() {
   const [video, setVideo] = useState<File | null>(null);
+  const [convertedVideos, setConvertedVideos] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null); // State to store error messages
+
+  const fetchVideos = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/videos", {
+        cache: "no-cache",
+      });
+
+      // Check if the response is OK and is in JSON format
+      if (!response.ok) {
+        throw new Error(`Error fetching videos: ${response.statusText}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Received response is not JSON");
+      }
+
+      const data = await response.json();
+
+      if (data && Array.isArray(data.videos)) {
+        setConvertedVideos(data.videos);
+      } else {
+        console.error("Unexpected data format:", data);
+        setError("Unexpected data format received from server.");
+      }
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      setError("Error fetching videos from the server.");
+    }
+  };
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Corrected this line
-    const uploadEndpoint = "http://localhost:5000/api/video-compression";
-    // Handle file upload
+    e.preventDefault();
     const formData = new FormData();
-    formData.append("video", video as Blob);
-    const response = await fetch(uploadEndpoint, {
-      method: "POST",
-      body: formData,
-    });
-    console.log(response);
+    if (video) {
+      formData.append("video", video);
+
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/video-compression",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        // Check if the response is OK
+        if (!response.ok) {
+          throw new Error(`Error uploading video: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log(data);
+
+        // After successful upload, re-fetch the list of converted videos
+        setError(null); // Clear any previous errors
+        fetchVideos(); // Re-fetch videos to update the list
+      } catch (error) {
+        console.error("Error uploading video:", error);
+        setError("Failed to upload video.");
+      }
+    }
   };
 
   return (
@@ -25,7 +81,7 @@ function App(): JSX.Element {
             type="file"
             name="video-file"
             id="video-file"
-            accept="video/*" // Added to restrict the file input to video files only
+            accept="video/*"
             onChange={(e) =>
               setVideo(e.target.files ? e.target.files[0] : null)
             }
@@ -33,6 +89,32 @@ function App(): JSX.Element {
         </label>
         <button type="submit">Submit</button>
       </form>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      <h2>Converted Videos</h2>
+      {convertedVideos.length > 0 ? (
+        <ul>
+          {convertedVideos.map((video) => (
+            <li key={video.outputPath}>
+              <p>Name: {video.originalName}</p>
+              <p>Original Size: {video.originalSize} bytes</p>
+              <p>Compressed Size: {video.compressedSize} bytes</p>
+              <p>Reduction: {video.reductionPercentage}%</p>
+              <a
+                href={`http://localhost:5000/api/download/${video.outputPath
+                  .split("/")
+                  .pop()}`}
+                download
+              >
+                Download
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No videos converted yet.</p>
+      )}
     </main>
   );
 }
