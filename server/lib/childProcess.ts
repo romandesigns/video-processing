@@ -1,8 +1,30 @@
-process.on("message", (message) => {
-  console.log("Message from parent:", message);
-  setTimeout(() => {
-    if (!process.send) return;
-    process.send("Hello from child process");
+import fs from "fs";
+import ffmpeg from "fluent-ffmpeg";
+
+process.on("message", (payload) => {
+  const { tempFilePath, name } = payload;
+  const endProcess = (endPayload) => {
+    const { statusCode, text } = endPayload;
+    // Remove temp file
+    fs.unlink(tempFilePath, (err) => {
+      if (err) {
+        process.send({ statusCode: 500, text: err.message });
+      }
+    });
+    // Format response so it fits the api response
+    process.send({ statusCode, text });
+    // End process
     process.exit();
-  }, 3000);
+  };
+  // Process video and send back the result
+  ffmpeg(tempFilePath)
+    .fps(30)
+    .addOptions(["-crf 28"])
+    .on("end", () => {
+      endProcess({ statusCode: 200, text: "Success" });
+    })
+    .on("error", (err) => {
+      endProcess({ statusCode: 500, text: err.message });
+    })
+    .save(`./temp/${name}`);
 });

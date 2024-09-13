@@ -5,3 +5,5 @@ services:
       - "5000:5000"
     volumes:
       - ./temp:/usr/src/app/temp
+    environment:
+      - NODE_ENV=production

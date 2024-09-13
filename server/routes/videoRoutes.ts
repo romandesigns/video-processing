@@ -14,12 +14,11 @@ router.post("/video-compression", (req, res) => {
   const tempFilePath = video.tempFilePath;
   if (video && tempFilePath) {
     const child = fork(path.resolve("./lib", "childProcess.ts"));
-    child.send(tempFilePath);
+    child.send({ tempFilePath, name: video.name });
+    // Listen for message from child process
     child.on("message", (message) => {
-      console.log(
-        "🚀 ~ file: server.js ~ line 37 ~ child.on ~ message",
-        message
-      );
+      const { statusCode, text } = message;
+      res.status(statusCode).send(text);
     });
     res.send("Success");
   } else {
