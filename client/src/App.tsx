@@ -4,6 +4,7 @@ import "./App.css";
 function App() {
   const [video, setVideo] = useState<File | null>(null);
   const [convertedVideos, setConvertedVideos] = useState<any[]>([]);
+  const [progress, setProgress] = useState<number>(0); // State to store progress
   const [error, setError] = useState<string | null>(null); // State to store error messages
 
   const serverHost = process.env.REACT_APP_SERVER_HOST;
@@ -40,7 +41,19 @@ function App() {
 
   useEffect(() => {
     fetchVideos();
-  }, []);
+
+    // Listen for progress updates using Server-Sent Events (SSE)
+    const eventSource = new EventSource(`${serverHost}/api/progress`);
+    eventSource.onmessage = (event) => {
+      const progressData = JSON.parse(event.data);
+      setProgress(progressData.percent); // Update the progress state
+    };
+
+    // Clean up EventSource when the component is unmounted
+    return () => {
+      eventSource.close();
+    };
+  }, [serverHost]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,16 +67,15 @@ function App() {
           body: formData,
         });
 
-        // Check if the response is OK
         if (!response.ok) {
           throw new Error(`Error uploading video: ${response.statusText}`);
         }
 
+        // Handle the JSON response
         const data = await response.json();
-        console.log(data);
+        console.log(data.message); // Should display "Processing started."
 
-        // After successful upload, re-fetch the list of converted videos
-        setError(null); // Clear any previous errors
+        // Start listening to progress updates after initiating the upload
       } catch (error) {
         console.error("Error uploading video:", error);
         setError("Failed to upload video.");
@@ -89,6 +101,13 @@ function App() {
       </form>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {/* Display the progress bar */}
+      <div>
+        <h2>Progress</h2>
+        <progress value={progress} max="100"></progress>
+        <p>{progress}% done</p>
+      </div>
 
       <h2>Converted Videos</h2>
       {convertedVideos.length > 0 ? (

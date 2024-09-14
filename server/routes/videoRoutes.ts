@@ -5,6 +5,21 @@ import fs from "fs";
 
 const router = express.Router();
 const videoInfoPath = path.join(process.cwd() + "/data/", "videoInfo.json");
+const clients: any[] = []; // Array to hold all connected clients for SSE
+
+// Handle progress updates using Server-Sent Events (SSE)
+router.get("/progress", (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  clients.push(res); // Add this client to the list
+
+  // Remove client from the list when the connection closes
+  req.on("close", () => {
+    clients.splice(clients.indexOf(res), 1);
+  });
+});
 
 router.get("/videos", (req, res) => {
   try {
@@ -52,40 +67,30 @@ router.get("/download/:fileName", (req, res) => {
 });
 
 router.post("/video-compression", (req, res) => {
-  if (!req.files) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-
+  if (!req.files) return;
   const video = req.files.video;
   const tempFilePath = video.tempFilePath;
-  const originalFilePath = path.dirname(tempFilePath);
-
   if (video && tempFilePath) {
     const child = fork(path.resolve("./lib", "childProcess.ts"));
-
-    // Send temp file path, original directory path, and video name to the child process
-    child.send({ tempFilePath, name: video.name, originalFilePath });
+    child.send({ tempFilePath, name: video.name });
 
     // Listen for messages from the child process
     child.on("message", (message) => {
-      const { statusCode, text } = message;
-      res.status(statusCode).json({
-        status: statusCode === 200 ? "success" : "error",
-        message: text,
-      });
+      const { statusCode, text, progress } = message;
+
+      if (progress !== undefined) {
+        // Send progress updates to all connected clients
+        clients.forEach((client) =>
+          client.write(`data: ${JSON.stringify({ percent: progress })}\n\n`)
+        );
+      } else {
+        res.status(statusCode).json({ message: text });
+      }
     });
 
-    // Error handling
-    child.on("error", (err) => {
-      console.error("Child process error:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-    });
-
-    child.on("exit", (code) => {
-      console.log(`Child process exited with code ${code}`);
-    });
+    res.json({ message: "Processing started." });
   } else {
-    res.status(400).json({ error: "No file uploaded" });
+    res.status(400).json({ message: "No file uploaded" });
   }
 });
 
