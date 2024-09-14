@@ -8,15 +8,7 @@ process.on("message", (payload) => {
   const endProcess = (endPayload) => {
     const { statusCode, text } = endPayload;
 
-    // Remove temp file
-    fs.unlink(tempFilePath, (err) => {
-      if (err) {
-        process.send({ statusCode: 500, text: err.message });
-        process.exit();
-      }
-    });
-
-    // Send response back to parent process
+    // Send response back to the parent process
     process.send({ statusCode, text });
 
     // End process
@@ -44,6 +36,16 @@ process.on("message", (payload) => {
       process.send({ progress: progress.percent.toFixed(2) });
     })
     .on("end", () => {
+      // Remove temp file after processing
+      fs.unlink(tempFilePath, (err) => {
+        if (err) {
+          console.error("Error removing temp file:", err);
+          process.send({ statusCode: 500, text: err.message });
+        } else {
+          console.log("Temp file removed successfully.");
+        }
+      });
+
       // Get original and compressed file sizes
       const originalSize = fs.statSync(originalFilePath).size;
       const compressedSize = fs.statSync(outputFilePath).size;
