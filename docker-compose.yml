@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   server:
     build:
@@ -9,6 +11,7 @@ services:
       - ./server:/usr/src/app
     environment:
       - NODE_ENV=production
+    restart: always
 
   client:
     build:
@@ -20,3 +23,4 @@ services:
       - NODE_ENV=production
     volumes:
       - ./client:/usr/src/app
+    restart: always

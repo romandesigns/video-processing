@@ -11,6 +11,42 @@
       "originalResolution": "3840x2160",
       "compressedResolution": "1280x720",
       "compressionTime": "68.09 seconds"
+    },
+    {
+      "id": "e51501bb-2995-4cd3-97cd-40eada32ab80",
+      "originalName": "20221012_120554.mp4",
+      "originalSize": 1399504821,
+      "compressedSize": 48827176,
+      "compressionDate": "2024-09-15T15:47:35.430Z",
+      "reductionPercentage": "96.51",
+      "outputPath": "/usr/src/app/compressed/1726415255425-20221012_120554.mp4",
+      "originalResolution": "3840x2160",
+      "compressedResolution": "1280x720",
+      "compressionTime": "69.49 seconds"
+    },
+    {
+      "id": "35f6eead-be20-424e-863c-3f0949c405f2",
+      "originalName": "20221012_120554.mp4",
+      "originalSize": 1399504821,
+      "compressedSize": 48827176,
+      "compressionDate": "2024-09-15T16:17:53.143Z",
+      "reductionPercentage": "96.51",
+      "outputPath": "/usr/src/app/compressed/1726417073137-20221012_120554.mp4",
+      "originalResolution": "3840x2160",
+      "compressedResolution": "1280x720",
+      "compressionTime": "67.04 seconds"
+    },
+    {
+      "id": "f2431e9c-a9f0-47c3-8135-48ddbe60224f",
+      "originalName": "20221012_120554.mp4",
+      "originalSize": 1399504821,
+      "compressedSize": 48827176,
+      "compressionDate": "2024-09-15T16:24:49.999Z",
+      "reductionPercentage": "96.51",
+      "outputPath": "/usr/src/app/compressed/1726417489996-20221012_120554.mp4",
+      "originalResolution": "3840x2160",
+      "compressedResolution": "1280x720",
+      "compressionTime": "68.22 seconds"
     }
   ]
 }
