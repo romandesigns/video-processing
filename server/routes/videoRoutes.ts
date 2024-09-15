@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 
 const router = express.Router();
-const videoInfoPath = path.join(process.cwd() + "/data/", "videoInfo.json");
+const videoInfoPath = path.join(process.cwd(), "/data/", "videoInfo.json");
 const clients: any[] = []; // Array to hold all connected clients for SSE
 
 // Handle progress updates using Server-Sent Events (SSE)
@@ -43,7 +43,7 @@ router.get("/videos", (req, res) => {
 
 router.get("/download/:fileName", (req, res) => {
   const fileName = req.params.fileName;
-  const filePath = path.join(process.cwd(), "temp", fileName);
+  const filePath = path.join(process.cwd(), "compressed", fileName);
 
   if (fs.existsSync(filePath)) {
     const stat = fs.statSync(filePath);
@@ -76,12 +76,19 @@ router.post("/video-compression", (req, res) => {
 
     // Listen for messages from the child process
     child.on("message", (message) => {
-      const { statusCode, text, progress } = message;
+      const { statusCode, text, progress, updatedVideoInfo } = message;
 
       if (progress !== undefined) {
         // Send progress updates to all connected clients
         clients.forEach((client) =>
           client.write(`data: ${JSON.stringify({ percent: progress })}\n\n`)
+        );
+      } else if (updatedVideoInfo) {
+        // Notify all clients of the updated video info
+        clients.forEach((client) =>
+          client.write(
+            `data: ${JSON.stringify({ videos: updatedVideoInfo })}\n\n`
+          )
         );
       } else {
         res.status(statusCode).json({ message: text });

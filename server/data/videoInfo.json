@@ -1,18 +1,16 @@
 {
   "compressedVideos": [
     {
+      "id": "75e36df1-b549-4afe-8b36-445a4f32e1e8",
       "originalName": "20221012_120554.mp4",
-      "originalSize": 4096,
-      "compressedSize": 254999433,
-      "reductionPercentage": "-6225472.09",
-      "outputPath": "/usr/src/app/temp/compressed_20221012_120554.mp4"
-    },
-    {
-      "originalName": "20221012_120554.mp4",
-      "originalSize": 4096,
-      "compressedSize": 816903960,
-      "reductionPercentage": "-19943844.34",
-      "outputPath": "/usr/src/app/temp/1726269706811-20221012_120554.mp4"
+      "originalSize": 1399504821,
+      "compressedSize": 48827176,
+      "compressionDate": "2024-09-15T00:27:06.271Z",
+      "reductionPercentage": "96.51",
+      "outputPath": "/usr/src/app/compressed/1726360026268-20221012_120554.mp4",
+      "originalResolution": "3840x2160",
+      "compressedResolution": "1280x720",
+      "compressionTime": "68.09 seconds"
     }
   ]
 }
